@@ -1,6 +1,8 @@
 require('./config/config');
 const express = require('express');
+const mongoose = require('mongoose');
 const bodyParser =  require('body-parser');
+const UsuarioController = require('./controllers/UsuarioController');
 const app = express();
 
 
@@ -13,30 +15,26 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // noinspection JSUnresolvedFunction
 app.use(bodyParser.json());
 
-// noinspection JSUnresolvedFunction
-app.get('/usuarios', function (req, resp) {
-    console.info('Server corriendo');
-    resp.json('Hola');
-    resp.end();
-});
+app.use(UsuarioController);
 
-app.post('/usuario', (req, resp) => {
-    let body = req.body;
+ mongoose.connect('mongodb://localhost:27017/cafe', { useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true})
+    .then(success => {
+        console.info('Conexión exitosa');
+
+    })
+    .catch(err => {
+        console.error('Error => ', err);
+    });
 
 
-    if (body.nombre === undefined) {
-        resp.status(400).json({
-            ok: false,
-            mensaje: 'Nombre obligatorio'
-        });
-    } else {
-        resp.json({
-            persona: body
-        });
 
-    }
-});
+
+
+
 
 app.listen(process.env.PORT, () => {
-   console.info('Servidor corriendo sobre el puerto: ', 3000);
+   console.info('Servidor corriendo sobre el puerto: ', process.env.PORT);
 });
