@@ -2,10 +2,16 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const Usuario = require('../models/Usuario');
+const { verificarToken, verificarAdminRole } = require('../middlewares/Autenticacion');
 const app = express();
 
 // noinspection JSUnresolvedFunction
-app.get('/usuarios', function (req, resp) {
+app.get('/usuarios', verificarToken, (req, resp) => {
+
+    return resp.json({
+        usuario: req.usuario
+    });
+
     let desde = req.query.desde || 0;
     desde = Number(desde);
 
@@ -36,7 +42,7 @@ app.get('/usuarios', function (req, resp) {
 });
 
 // noinspection JSUnresolvedFunction
-app.post('/usuario', (req, resp) => {
+app.post('/usuario', [verificarToken, verificarAdminRole], (req, resp) => {
 
     let body = req.body;
 
@@ -63,7 +69,7 @@ app.post('/usuario', (req, resp) => {
 
 
 // noinspection JSUnresolvedFunction
-app.post('/usuario/:idUsuario', (req, resp) => {
+app.post('/usuario/:idUsuario', [verificarToken, verificarAdminRole], (req, resp) => {
     let id = req.params.idUsuario;
     let body = _.pick(req.body, ['nombre', 'email', 'img', 'rol', 'status']);
 
@@ -82,7 +88,7 @@ app.post('/usuario/:idUsuario', (req, resp) => {
 });
 
 // noinspection JSUnresolvedFunction
-app.post('/borrar/usuario/:idUsuario', (req, resp) => {
+app.post('/borrar/usuario/:idUsuario', [verificarToken, verificarAdminRole], (req, resp) => {
     let id = req.params.idUsuario;
 
     Usuario.findByIdAndRemove(id, (err, usuarioData) => {

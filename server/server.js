@@ -2,7 +2,7 @@ require('./config/config');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser =  require('body-parser');
-const UsuarioController = require('./controllers/UsuarioController');
+const IndexController = require('./controllers/IndexController');
 const app = express();
 
 
@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // noinspection JSUnresolvedFunction
 app.use(bodyParser.json());
 
-app.use(UsuarioController);
+app.use(IndexController);
 
  mongoose.connect(process.env.URLDB, { useNewUrlParser: true,
     useUnifiedTopology: true,
