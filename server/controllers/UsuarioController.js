@@ -6,9 +6,33 @@ const app = express();
 
 // noinspection JSUnresolvedFunction
 app.get('/usuarios', function (req, resp) {
-    console.info('Server corriendo');
-    resp.json('Hola');
-    resp.end();
+    let desde = req.query.desde || 0;
+    desde = Number(desde);
+
+    let limitePorPagina = req.query.limitePorPagina || 5;
+    limitePorPagina = Number(limitePorPagina);
+
+    Usuario.find({ status: true })
+        .skip(desde)
+        .limit(limitePorPagina)
+        .exec((err, usuarioData) => {
+            if (err) {
+                return resp.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
+
+            Usuario.countDocuments({ status: true }, (err, totalUsuarios) => {
+                resp.json({
+                    ok:true,
+                    usuarioData,
+                    totalUsuarios
+                })
+            });
+
+
+        });
 });
 
 // noinspection JSUnresolvedFunction
@@ -58,8 +82,62 @@ app.post('/usuario/:idUsuario', (req, resp) => {
 });
 
 // noinspection JSUnresolvedFunction
-app.delete('/usuario', (req, resp) => {
+app.post('/borrar/usuario/:idUsuario', (req, resp) => {
+    let id = req.params.idUsuario;
 
+    Usuario.findByIdAndRemove(id, (err, usuarioData) => {
+        if (err) {
+            return resp.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
+        if (!usuarioData) {
+            return resp.status(404).json({
+                ok: false,
+                err: {
+                    message: 'Usuario no encontrado'
+                }
+            });
+        }
+
+        resp.json({
+            ok: true,
+            usuario: usuarioData
+        })
+    });
+});
+
+app.delete('/borrar/usuario/:idUsuario', (req, resp) => {
+    let id = req.params.idUsuario;
+
+    let eliminarUsuario = {
+      status: false
+    };
+
+    Usuario.findByIdAndUpdate(id, eliminarUsuario, { new: true }, (err, usuarioData) => {
+        if (err) {
+            return resp.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
+        if (!usuarioData) {
+            return resp.status(404).json({
+                ok: false,
+                err: {
+                    message: 'Usuario no encontrado'
+                }
+            });
+        }
+
+        resp.json({
+            ok: true,
+            usuario: usuarioData
+        })
+    });
 });
 
 
