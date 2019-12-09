@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const _ = require('underscore');
 const Usuario = require('../models/Usuario');
 const app = express();
 
@@ -32,21 +33,29 @@ app.post('/usuario', (req, resp) => {
         resp.json({
             ok: true,
             usuario: usuarioData
-        })
+        });
     });
-    // if (body.nombre === undefined) {
-    //     resp.status(400).json({
-    //         ok: false,
-    //         mensaje: 'Nombre obligatorio'
-    //     });
-    // } else {
-    //     resp.json({
-    //         persona: body
-    //     });
-    //
-    // }
 });
 
+
+// noinspection JSUnresolvedFunction
+app.post('/usuario/:idUsuario', (req, resp) => {
+    let id = req.params.idUsuario;
+    let body = _.pick(req.body, ['nombre', 'email', 'img', 'rol', 'status']);
+
+    Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true },(err, usuarioData) => {
+        if (err) {
+            return resp.status(400).json({
+                ok: false,
+                err
+            });
+        }
+        resp.json({
+            ok: true,
+            usuario: usuarioData
+        })
+    });
+});
 
 // noinspection JSUnresolvedFunction
 app.delete('/usuario', (req, resp) => {
